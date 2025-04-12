@@ -1,0 +1,10 @@
+Abilities:
+  HealingWaters:
+    SelectRange: 7
+    Cooldown: 13000
+    HealFrequency: 30
+    MaxHeal: 5
+Strings:
+  HealingWaters:
+    Description: 'HealingWaters Rework | Allows the player to heal others or self.'
+    Instructions: 'Left click while looking at the water source to select source, hold sneak to pull the water to you. If you attack an entity while using HealingWaters, you will start healing them.'
