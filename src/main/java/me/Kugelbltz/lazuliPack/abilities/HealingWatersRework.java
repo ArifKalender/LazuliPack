@@ -5,7 +5,6 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
 import com.projectkorra.projectkorra.util.BlockSource;
 import com.projectkorra.projectkorra.util.ClickType;
-import com.projectkorra.projectkorra.util.ParticleEffect;
 import com.projectkorra.projectkorra.util.TempBlock;
 import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import me.Kugelbltz.lazuliPack.LazuliPack;
@@ -13,19 +12,18 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import static me.Kugelbltz.lazuliPack.LazuliPack.plugin;
 import static me.Kugelbltz.lazuliPack.LazuliPack.random;
@@ -73,20 +71,21 @@ public class HealingWatersRework extends HealingAbility implements AddonAbility,
     }
 
     private void setFields() {
-        range = plugin.getConfig().getInt("Skills.Water.HealingWaters.SelectRange");
-        cooldown = plugin.getConfig().getLong("Skills.Water.HealingWaters.Cooldown");
-        power = (short) plugin.getConfig().getInt("Skills.Water.HealingWaters.HealFrequency");
-        maxHeal = plugin.getConfig().getInt("Skills.Water.HealingWaters.MaxHeal");
+        range = plugin.getConfig().getInt("Abilities.HealingWaters.SelectRange");
+        cooldown = plugin.getConfig().getLong("Abilities.HealingWaters.Cooldown");
+        power = (short) plugin.getConfig().getInt("Abilities.HealingWaters.HealFrequency");
+        maxHeal = plugin.getConfig().getInt("Abilities.HealingWaters.MaxHeal");
+
+        description = plugin.getConfig().getString("Strings.HealingWaters.Description");
+        instructions = plugin.getConfig().getString("Strings.HealingWaters.Instructions");
         increment = 0;
     }
 
 
     private static void cancelPrevious(Player player) {
         Collection<HealingWatersRework> hw = getAbilities(player, HealingWatersRework.class);
-        Iterator var2 = hw.iterator();
 
-        while (var2.hasNext()) {
-            HealingWatersRework oldhw = (HealingWatersRework) var2.next();
+        for (HealingWatersRework oldhw : hw) {
             if (oldhw != null && !oldhw.started) {
                 oldhw.remove();
             }
@@ -121,45 +120,35 @@ public class HealingWatersRework extends HealingAbility implements AddonAbility,
         if (healingPlayer.get(player) == null) {
             if (increment >= 70) {
                 GeneralMethods.displayColoredParticle("#a2befc", particleLocation, 3, 0, 0, 0);
-                //ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.05F, 0.05F, 0.05F, Material.WHITE_CONCRETE.createBlockData());
                 if (random.nextInt(0, 10) <= 2)
-                    ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.05F, 0.05F, 0.05F, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
-
+                    particleLocation.getWorld().spawnParticle(Particle.FALLING_DUST, particleLocation, 1, 0.05, 0.05, 0.05, 0.05, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
             } else if (increment >= 35) {
                 GeneralMethods.displayColoredParticle("#77a1fc", particleLocation, 3, 0, 0, 0);
 
                 if (random.nextInt(0, 10) <= 2)
-                    ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.05F, 0.05F, 0.05F, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
-                //ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.05F, 0.05F, 0.05F, Material.BLUE_WOOL.createBlockData());
-
+                    particleLocation.getWorld().spawnParticle(Particle.FALLING_DUST, particleLocation, 1, 0.05, 0.05, 0.05, 0.05, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
             } else {
                 GeneralMethods.displayColoredParticle("#4f87ff", particleLocation, 3, 0, 0, 0);
 
                 if (random.nextInt(0, 10) <= 2)
-                    ParticleEffect.FALLING_DUST.display(particleLocation, 2, 0.05F, 0.05F, 0.05F, 0.05F, Material.BLUE_WOOL.createBlockData());
-
-
+                    particleLocation.getWorld().spawnParticle(Particle.FALLING_DUST, particleLocation, 2, 0.05, 0.05, 0.05, 0.05, Material.BLUE_WOOL.createBlockData());
             }
         } else {
             if (increment >= 70) {
                 GeneralMethods.displayColoredParticle("#a2befc", particleLocation, 3, 0, 0.3, 0);
                 //ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.05F, 0.05F, 0.05F, Material.WHITE_CONCRETE.createBlockData());
                 if (random.nextInt(0, 10) <= 2)
-                    ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.3, 0.05F, 0.05F, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
-
+                    particleLocation.getWorld().spawnParticle(Particle.FALLING_DUST, particleLocation, 1, 0.05, 0.3, 0.05, 0.05, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
             } else if (increment >= 35) {
                 GeneralMethods.displayColoredParticle("#77a1fc", particleLocation, 3, 0, 0.3, 0);
 
                 if (random.nextInt(0, 10) <= 2)
-                    ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.3, 0.05F, 0.05F, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
-                //ParticleEffect.FALLING_DUST.display(particleLocation, 1, 0.05F, 0.05F, 0.05F, 0.05F, Material.BLUE_WOOL.createBlockData());
-
+                    particleLocation.getWorld().spawnParticle(Particle.FALLING_DUST, particleLocation, 1, 0.05, 0.3, 0.05, 0.05, Material.LIGHT_BLUE_GLAZED_TERRACOTTA.createBlockData());
             } else {
                 GeneralMethods.displayColoredParticle("#4f87ff", particleLocation, 3, 0, 0.3, 0);
 
                 if (random.nextInt(0, 10) <= 2)
-                    ParticleEffect.FALLING_DUST.display(particleLocation, 2, 0.05F, 0.3, 0.05F, 0.05F, Material.BLUE_WOOL.createBlockData());
-
+                    particleLocation.getWorld().spawnParticle(Particle.FALLING_DUST, particleLocation, 2, 0.05, 0.3, 0.05, 0.05, Material.BLUE_WOOL.createBlockData());
             }
         }
     }
@@ -187,8 +176,8 @@ public class HealingWatersRework extends HealingAbility implements AddonAbility,
             if (player.isSneaking()) {
                 started = true;
             } else {
-                ParticleEffect.FALLING_DUST.display(abilLocation, 2, 0.1F, 0.1F, 0.1F, 0.05F, Material.BLUE_WOOL.createBlockData());
-                ParticleEffect.WATER_WAKE.display(abilLocation, 2, 0.1f, 0.1f, 0.1f, 0.05f);
+                abilLocation.getWorld().spawnParticle(Particle.FALLING_DUST, abilLocation, 2, 0.1, 0.1, 0.1, 0.05, Material.BLUE_WOOL.createBlockData());
+                abilLocation.getWorld().spawnParticle(Particle.FALLING_DRIPSTONE_WATER, abilLocation, 2, 0.1, 0.1, 0.1, 0.05);
             }
         }
         if ((started && !player.isSneaking()) || player.isDead() ||  maxHeal <= 0 || getHandLocation(player, false).distance(abilLocation) > range || player.isDead() || !player.isOnline() && !bPlayer.canBend(this) || bPlayer.isChiBlocked() || !bPlayer.getBoundAbilityName().equalsIgnoreCase("HealingWaters")) {
