@@ -1,0 +1,4 @@
+name: LazuliPack
+version: '1.0'
+main: me.Kugelbltz.lazuliPack.LazuliPack
+api-version: '1.21'
