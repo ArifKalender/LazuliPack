@@ -9,7 +9,6 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -26,12 +25,10 @@ import static me.Kugelbltz.lazuliPack.LazuliPack.version;
 
 public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbility, SubAbility {
 
-    Location location;
-    Location origin;
-    double frequency;
+    Location location,origin;
+
     @Attribute(Attribute.WIDTH)
     double width;
-    double iceFrequency;
     @Attribute(Attribute.COOLDOWN)
     long cooldown;
     @Attribute(Attribute.RANGE)
@@ -40,11 +37,17 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
     double damage;
     @Attribute(Attribute.DURATION)
     long maxDuration;
+
+    Random random = new Random();
+    int height;
     int revertTime;
     float increase;
+    double iceFrequency;
+    double frequency;
     boolean enabled;
 
-    String description, instructions;
+    List<Location> locations = new ArrayList<>();
+
 
     public GlacialThorns(Player player) {
         super(player);
@@ -53,7 +56,7 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
         if (!bPlayer.isOnCooldown(this)) {
             if (!bPlayer.isChiBlocked()) {
 
-                for (Block block : getNearbyBlocks(player.getLocation(), 3)) {
+                for (Block block : GeneralMethods.getBlocksAroundPoint(player.getLocation(), 3)) {
                     if (this.isWaterbendable(block)) {
                         increase=0;
                         start();
@@ -65,42 +68,8 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
         }
     }
 
-
-    public static List<Block> getNearbyBlocks(Location location, double radius) {
-        List<Block> nearbyBlocks = new ArrayList<>();
-        World world = location.getWorld();
-
-        if (world == null) {
-            return nearbyBlocks;
-        }
-
-        int radiusCeil = (int) Math.ceil(radius);
-
-        int startX = location.getBlockX() - radiusCeil;
-        int startY = location.getBlockY() - radiusCeil;
-        int startZ = location.getBlockZ() - radiusCeil;
-
-        int endX = location.getBlockX() + radiusCeil;
-        int endY = location.getBlockY() + radiusCeil;
-        int endZ = location.getBlockZ() + radiusCeil;
-
-        for (int x = startX; x <= endX; x++) {
-            for (int y = startY; y <= endY; y++) {
-                for (int z = startZ; z <= endZ; z++) {
-                    Location blockLocation = new Location(world, x, y, z);
-                    if (blockLocation.distance(location) <= radius) {
-                        Block block = world.getBlockAt(x, y, z);
-                        nearbyBlocks.add(block);
-                    }
-                }
-            }
-        }
-
-        return nearbyBlocks;
-    }
-
-
     private void setFields() {
+
         frequency = plugin.getConfig().getDouble("Abilities.GlacialThorns.Frequency");
         iceFrequency = frequency * 2;
         cooldown = plugin.getConfig().getLong("Abilities.GlacialThorns.Cooldown");
@@ -118,23 +87,24 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
         location.setY(player.getLocation().getY() - 1);
     }
 
-    Random random = new Random();
-    int height;
-
-    private void generateThorn() {
-        List<Location> locations = new ArrayList<>();
+    private void listTargetLocations(){
         for(int i=1;i<=width;i++){
             locations.add(GeneralMethods.getLeftSide(location,i));
             locations.add(GeneralMethods.getRightSide(location,i));
         }
-
         locations.add(location);
+    }
 
+    //Don't stare at it too long, you'll go mad
+    private void generateThorn() {
+        listTargetLocations();
         playIcebendingSound(location);
+
         for (Location loopLocation : locations) {
 
             int chance = random.nextInt(0, 100);
 
+            //Honestly, the below is really old code and I forgot what does what and I'm too lazy to rework it.
 
             if (this.isWaterbendable(loopLocation.getBlock()) && chance <= frequency) {
                 for(Block innerLoopBlock : GeneralMethods.getBlocksAroundPoint(loopLocation,1.5)){
@@ -172,9 +142,9 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
                 loopLocation.setY(loopLocation.getY() + 1);
                 for (Entity entity : GeneralMethods.getEntitiesAroundPoint(location, 2.5)) {
                     if (entity instanceof LivingEntity) {
-                        if (entity != player) {//OFFFFF KAFAM AGRIDI
+                        if (entity != player) {
                             DamageHandler.damageEntity(entity, damage, this);
-                            entity.setVelocity(new Vector(0, 0.75, 0));//idk ve umrumda da deigl i
+                            entity.setVelocity(new Vector(0, 0.75, 0));
                         }
 
                     }
@@ -184,7 +154,6 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
         }
     }
 
-
     @Override
     public void progress() {
         if(bPlayer.isChiBlocked()){
@@ -192,12 +161,15 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
             bPlayer.addCooldown(this);
             return;
         }
+
         increase=increase+0.25f;
         generateThorn();
+
         if(maxDuration+this.getStartTime() <= System.currentTimeMillis()){
             remove();
             bPlayer.addCooldown(this);
         }
+
         location.setY(origin.getY() - 1);
         location.add(location.getDirection());
         if (location.distance(origin) >= range) {
@@ -229,12 +201,12 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
 
     @Override
     public String getDescription() {
-        return "The combo made by Eska and Desna. Bend the ice in such a way to make thorns that pierce through your opponents";
+        return plugin.getConfig().getString("Strings.GlacialThorns.Description");
     }
 
     @Override
     public String getInstructions() {
-        return "While looking at a large body of water: IceSpike (Tap sneak) > PhaseChange (Left click) > PhaseChange (Left click)";
+        return plugin.getConfig().getString("Strings.GlacialThorns.Instructions");
     }
 
     @Override
