@@ -9,6 +9,7 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -46,7 +47,6 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
     double frequency;
     boolean enabled;
 
-    List<Location> locations = new ArrayList<>();
 
 
     public GlacialThorns(Player player) {
@@ -87,33 +87,32 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
         location.setY(player.getLocation().getY() - 1);
     }
 
-    private void listTargetLocations(){
+
+    //Don't stare at it too long, you'll go mad
+    private void generateThorn() {
+        List<Location> locations = new ArrayList<>();
         for(int i=1;i<=width;i++){
             locations.add(GeneralMethods.getLeftSide(location,i));
             locations.add(GeneralMethods.getRightSide(location,i));
         }
         locations.add(location);
-    }
 
-    //Don't stare at it too long, you'll go mad
-    private void generateThorn() {
-        listTargetLocations();
         playIcebendingSound(location);
 
         for (Location loopLocation : locations) {
-
             int chance = random.nextInt(0, 100);
 
             //Honestly, the below is really old code and I forgot what does what and I'm too lazy to rework it.
-
             if (this.isWaterbendable(loopLocation.getBlock()) && chance <= frequency) {
                 for(Block innerLoopBlock : GeneralMethods.getBlocksAroundPoint(loopLocation,1.5)){
                     if(innerLoopBlock.getType() == Material.WATER){
                         new TempBlock(innerLoopBlock, Material.ICE.createBlockData(), revertTime);
                     }
-
+                    innerLoopBlock.getWorld().spawnParticle(Particle.CLOUD,innerLoopBlock.getLocation().add(0,1,0),5,1,1,1,0);
                 }
+
                 height = random.nextInt(3, 5);
+
                 for (int j = 0; j <= height+increase; j++) {
                     loopLocation.setY(origin.getY() + j);
                     TempBlock buz = new TempBlock(loopLocation.getBlock(), Material.ICE.createBlockData(), revertTime);
@@ -122,6 +121,7 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
                 }
 
                 loopLocation.setY(loopLocation.getY() + 1);
+
                 for (Entity entity : GeneralMethods.getEntitiesAroundPoint(location, 2.5)) {
                     if (entity instanceof LivingEntity) {
                         if (entity != player) {
@@ -130,26 +130,27 @@ public class GlacialThorns extends IceAbility implements AddonAbility, ComboAbil
                         }
                     }
                 }
-            } else if (this.isIcebendable(loopLocation.getBlock()) && chance <= iceFrequency) {
 
+            } else if (this.isIcebendable(loopLocation.getBlock()) && chance <= iceFrequency) {
                 height = random.nextInt(3, 5);
+
                 for (int j = 0; j <= height+increase; j++) {
                     loopLocation.setY(origin.getY() + j);
                     TempBlock buz = new TempBlock(loopLocation.getBlock(), Material.ICE.createBlockData(), revertTime);
                     buz.setCanSuffocate(false);
                     bPlayer.addCooldown(this);
                 }
+
                 loopLocation.setY(loopLocation.getY() + 1);
+
                 for (Entity entity : GeneralMethods.getEntitiesAroundPoint(location, 2.5)) {
                     if (entity instanceof LivingEntity) {
                         if (entity != player) {
                             DamageHandler.damageEntity(entity, damage, this);
                             entity.setVelocity(new Vector(0, 0.75, 0));
                         }
-
                     }
                 }
-
             }
         }
     }
