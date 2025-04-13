@@ -1,10 +1,23 @@
 Abilities:
   HealingWaters:
+    Enabled: true
     SelectRange: 7
     Cooldown: 13000
     HealFrequency: 30
     MaxHeal: 5
+  GlacialThorns:
+    Enabled: true
+    Frequency: 15
+    Damage: 2.0
+    Cooldown: 15000
+    Range: 25
+    RevertTime: 2500
+    WidthFromOrigin: 3
+    MaxDuration: 3000
 Strings:
   HealingWaters:
     Description: 'HealingWaters Rework | Allows the player to heal others or self.'
     Instructions: 'Left click while looking at the water source to select source, hold sneak to pull the water to you. If you attack an entity while using HealingWaters, you will start healing them.'
+  GlacialThorns:
+    Description: 'The combo made by Eska and Desna. Bend the ice in such a way to make thorns that pierce through your opponents.'
+    Instructions: 'While looking at a large body of water: IceSpike (Tap sneak) > PhaseChange (Left click) > PhaseChange (Left click)'

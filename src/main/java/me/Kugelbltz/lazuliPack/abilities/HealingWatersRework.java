@@ -41,6 +41,7 @@ public class HealingWatersRework extends HealingAbility implements AddonAbility,
     String description, instructions;
 
     boolean started;
+    boolean enabled;
     int increment;
     Block prepareBlock;
     Vector vector;
@@ -78,9 +79,14 @@ public class HealingWatersRework extends HealingAbility implements AddonAbility,
 
         description = plugin.getConfig().getString("Strings.HealingWaters.Description");
         instructions = plugin.getConfig().getString("Strings.HealingWaters.Instructions");
+        enabled = plugin.getConfig().getBoolean("Abilities.HealingWaters.Enabled");
         increment = 0;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
+    }
 
     private static void cancelPrevious(Player player) {
         Collection<HealingWatersRework> hw = getAbilities(player, HealingWatersRework.class);

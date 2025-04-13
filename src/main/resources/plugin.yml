@@ -1,4 +1,5 @@
 name: LazuliPack
 version: '0.1'
 main: me.Kugelbltz.lazuliPack.LazuliPack
+author: Kugelbltz
 api-version: '1.21'
